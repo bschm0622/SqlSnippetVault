@@ -17,7 +17,9 @@ import {
   Copy, 
   Trash2, 
   ChevronRight,
-  Shield
+  Shield,
+  Keyboard,
+  X
 } from "lucide-react";
 
 declare global {
@@ -33,6 +35,7 @@ export default function SQLSnippetManager() {
   const [snippetName, setSnippetName] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isUnsaved, setIsUnsaved] = useState(false);
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
   
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const codeMirrorRef = useRef<any>(null);
@@ -103,11 +106,56 @@ export default function SQLSnippetManager() {
         handleFormatSQL();
         return;
       }
+
+      // Handle Ctrl+C (Copy) when editor is focused
+      if (event.ctrlKey && event.key === 'c' && event.target === codeMirrorRef.current?.getInputField()) {
+        // Let default copy behavior work for selected text, but also copy full snippet if nothing selected
+        setTimeout(() => {
+          const selectedText = codeMirrorRef.current?.getSelection();
+          if (!selectedText) {
+            handleCopySnippet();
+          }
+        }, 0);
+        return;
+      }
+
+      // Handle Ctrl+N (New snippet)
+      if (event.ctrlKey && event.key === 'n') {
+        event.preventDefault();
+        handleCreateSnippet();
+        return;
+      }
+
+      // Handle Ctrl+D (Delete snippet) - more reliable than Ctrl+Delete
+      if (event.ctrlKey && event.key === 'd' && currentSnippet) {
+        event.preventDefault();
+        if (confirm(`Are you sure you want to delete "${currentSnippet.name}"?`)) {
+          handleDeleteSnippet();
+        }
+        return;
+      }
+
+      // Handle Ctrl+/ (Show keyboard shortcuts) - won't interfere with typing
+      if (event.ctrlKey && event.key === '/') {
+        event.preventDefault();
+        setShowKeyboardHelp(true);
+        return;
+      }
+
+      // Handle Escape (Close modals)
+      if (event.key === 'Escape') {
+        if (showKeyboardHelp) {
+          setShowKeyboardHelp(false);
+        } else if (isImportModalOpen) {
+          setIsImportModalOpen(false);
+        }
+        return;
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [snippetName, currentSnippet]); // Include dependencies so handlers have current state
+  }, [snippetName, currentSnippet, showKeyboardHelp, isImportModalOpen]); // Include dependencies so handlers have current state
 
   // Load snippets on mount
   useEffect(() => {
@@ -369,11 +417,21 @@ export default function SQLSnippetManager() {
       {/* Sidebar */}
       <div className="w-80 bg-slate-800 text-white flex flex-col border-r border-slate-700">
         {/* Sidebar Header */}
-        <div className="p-6 border-b border-slate-700">
-          <h1 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Database className="h-6 w-6 text-blue-400" />
-            SQL Snippets
-          </h1>
+        <div className="p-4 border-b border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Database className="h-5 w-5 text-blue-400" />
+              SQL Snippets
+            </h1>
+            <Button
+              onClick={handleCreateSnippet}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md transition-colors"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              New
+            </Button>
+          </div>
           
           {/* Search Input */}
           <div className="relative">
@@ -433,15 +491,7 @@ export default function SQLSnippetManager() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-700 space-y-3">
-          <Button
-            onClick={handleCreateSnippet}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Snippet
-          </Button>
-          
+        <div className="p-4 border-t border-slate-700">
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -465,77 +515,76 @@ export default function SQLSnippetManager() {
 
       {/* Main Editor */}
       <div className="flex-1 flex flex-col bg-white">
-        {/* Editor Header */}
-        <div className="bg-white border-b border-slate-200 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
+        {/* Compact Toolbar */}
+        <div className="bg-white border-b border-slate-200 px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1">
               <Input
                 type="text"
-                placeholder="Snippet name..."
+                placeholder="Enter snippet name..."
                 value={snippetName}
                 onChange={(e) => {
                   setSnippetName(e.target.value);
                   setIsUnsaved(true);
                 }}
-                className="text-lg font-semibold bg-transparent border-none shadow-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded px-2 py-1 flex-1"
+                className="max-w-xs text-sm font-medium border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
-              {currentSnippet && (
-                <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded whitespace-nowrap">
-                  Last modified: {formatDate(currentSnippet.lastModified)}
-                </span>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopySnippet}
-                className="text-slate-500 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100"
-                title="Copy to clipboard"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDeleteSnippet}
-                className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
-                title="Delete snippet"
-                disabled={!currentSnippet}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Toolbar */}
-        <div className="bg-slate-50 border-b border-slate-200 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
               <Button
                 onClick={handleSaveSnippet}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 transition-colors"
                 disabled={!snippetName.trim()}
               >
-                <Save className="h-4 w-4 mr-2" />
-                Save
-                {isUnsaved && <span className="ml-1">*</span>}
+                <Save className="h-4 w-4 mr-1.5" />
+                Save{isUnsaved && "*"}
               </Button>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleFormatSQL}
-                className="bg-white border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-lg transition-colors"
+                className="border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 transition-colors"
               >
-                <Wand2 className="h-4 w-4 mr-2" />
+                <Wand2 className="h-4 w-4 mr-1.5" />
                 Format
               </Button>
             </div>
             
-            <div className="text-xs text-slate-500 flex items-center gap-4">
-              <span>Ctrl+S to save</span>
-              <span>Ctrl+Shift+F to format</span>
+            <div className="flex items-center gap-4">
+              {currentSnippet && (
+                <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                  Last modified: {formatDate(currentSnippet.lastModified)}
+                </span>
+              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowKeyboardHelp(true)}
+                  className="text-slate-500 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100"
+                  title="Keyboard shortcuts (Ctrl+/)"
+                >
+                  <Keyboard className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCopySnippet}
+                  className="text-slate-500 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100"
+                  title="Copy to clipboard (Ctrl+C)"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDeleteSnippet}
+                  className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
+                  title="Delete snippet (Ctrl+D)"
+                  disabled={!currentSnippet}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -618,6 +667,75 @@ export default function SQLSnippetManager() {
               disabled={!fileInputRef.current?.files?.[0]}
             >
               Import
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <Dialog open={showKeyboardHelp} onOpenChange={setShowKeyboardHelp}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Keyboard className="h-5 w-5" />
+              Keyboard Shortcuts
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                <span className="text-sm text-slate-700">Save snippet</span>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + S</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                <span className="text-sm text-slate-700">Format SQL</span>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + Shift + F</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                <span className="text-sm text-slate-700">Copy snippet</span>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + C</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                <span className="text-sm text-slate-700">New snippet</span>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + N</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                <span className="text-sm text-slate-700">Delete snippet</span>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + D</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                <span className="text-sm text-slate-700">Show shortcuts</span>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + /</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-slate-700">Close modals</span>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Escape</kbd>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <div className="text-blue-500 text-sm mt-0.5">💡</div>
+                <div>
+                  <p className="text-sm text-blue-800 font-medium">
+                    Pro tip
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Press <kbd className="px-1 py-0.5 bg-white rounded text-xs font-mono">Ctrl + /</kbd> anytime to see these shortcuts. 
+                    Most shortcuts work from anywhere in the app.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end mt-6">
+            <Button
+              onClick={() => setShowKeyboardHelp(false)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Got it
             </Button>
           </div>
         </DialogContent>
