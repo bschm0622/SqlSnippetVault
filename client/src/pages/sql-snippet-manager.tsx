@@ -54,8 +54,14 @@ export default function SQLSnippetManager() {
           autoCloseBrackets: true,
           matchBrackets: true,
           extraKeys: {
-            "Ctrl-S": () => handleSaveSnippet(),
-            "Ctrl-Shift-F": () => handleFormatSQL(),
+            "Ctrl-S": (cm: any) => {
+              // Prevent browser default save dialog
+              return false;
+            },
+            "Ctrl-Shift-F": (cm: any) => {
+              // Prevent browser default find dialog
+              return false;
+            },
           },
         });
 
@@ -80,6 +86,28 @@ export default function SQLSnippetManager() {
       return () => clearInterval(checkCodeMirror);
     }
   }, []);
+
+  // Handle keyboard shortcuts globally
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Handle Ctrl+S (Save)
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        handleSaveSnippet();
+        return;
+      }
+
+      // Handle Ctrl+Shift+F (Format)
+      if (event.ctrlKey && event.shiftKey && event.key === 'F') {
+        event.preventDefault();
+        handleFormatSQL();
+        return;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [snippetName, currentSnippet]); // Include dependencies so handlers have current state
 
   // Load snippets on mount
   useEffect(() => {
