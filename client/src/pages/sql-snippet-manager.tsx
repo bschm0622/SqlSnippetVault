@@ -126,8 +126,8 @@ export default function SQLSnippetManager() {
         return;
       }
 
-      // Handle Delete key (Delete snippet) - only when not typing in editor
-      if (event.key === 'Delete' && event.ctrlKey && currentSnippet) {
+      // Handle Ctrl+D (Delete snippet) - more reliable than Ctrl+Delete
+      if (event.ctrlKey && event.key === 'd' && currentSnippet) {
         event.preventDefault();
         if (confirm(`Are you sure you want to delete "${currentSnippet.name}"?`)) {
           handleDeleteSnippet();
@@ -135,14 +135,10 @@ export default function SQLSnippetManager() {
         return;
       }
 
-      // Handle ? (Show keyboard shortcuts)
-      if (event.key === '?' && !event.ctrlKey && !event.altKey && !event.shiftKey) {
-        const activeElement = document.activeElement;
-        // Only show help if not typing in an input field
-        if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA' && !activeElement?.closest('.CodeMirror')) {
-          event.preventDefault();
-          setShowKeyboardHelp(true);
-        }
+      // Handle Ctrl+/ (Show keyboard shortcuts) - won't interfere with typing
+      if (event.ctrlKey && event.key === '/') {
+        event.preventDefault();
+        setShowKeyboardHelp(true);
         return;
       }
 
@@ -565,7 +561,7 @@ export default function SQLSnippetManager() {
                   size="sm"
                   onClick={() => setShowKeyboardHelp(true)}
                   className="text-slate-500 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100"
-                  title="Keyboard shortcuts (?)"
+                  title="Keyboard shortcuts (Ctrl+/)"
                 >
                   <Keyboard className="h-4 w-4" />
                 </Button>
@@ -583,7 +579,7 @@ export default function SQLSnippetManager() {
                   size="sm"
                   onClick={handleDeleteSnippet}
                   className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
-                  title="Delete snippet (Ctrl+Delete)"
+                  title="Delete snippet (Ctrl+D)"
                   disabled={!currentSnippet}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -706,11 +702,11 @@ export default function SQLSnippetManager() {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-100">
                 <span className="text-sm text-slate-700">Delete snippet</span>
-                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + Delete</kbd>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + D</kbd>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-100">
                 <span className="text-sm text-slate-700">Show shortcuts</span>
-                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">?</kbd>
+                <kbd className="px-2 py-1 bg-slate-100 rounded text-xs font-mono">Ctrl + /</kbd>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-sm text-slate-700">Close modals</span>
@@ -726,7 +722,7 @@ export default function SQLSnippetManager() {
                     Pro tip
                   </p>
                   <p className="text-xs text-blue-700 mt-1">
-                    Press <kbd className="px-1 py-0.5 bg-white rounded text-xs font-mono">?</kbd> anytime to see these shortcuts. 
+                    Press <kbd className="px-1 py-0.5 bg-white rounded text-xs font-mono">Ctrl + /</kbd> anytime to see these shortcuts. 
                     Most shortcuts work from anywhere in the app.
                   </p>
                 </div>
