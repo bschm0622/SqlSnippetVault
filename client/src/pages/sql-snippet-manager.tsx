@@ -45,6 +45,7 @@ export default function SQLSnippetManager() {
     handleDeleteSnippet,
     handleFormatSQL,
     handleCopySnippet,
+    handleRevertChanges,
     loadSnippets,
   } = useSnippetManager();
 
@@ -167,8 +168,8 @@ export default function SQLSnippetManager() {
           setSnippetName={setSnippetName}
           onNameChange={() => setIsUnsaved(true)}
           isUnsaved={isUnsaved}
-          autoSaveStatus={autoSaveStatus}
           onSave={handleSaveSnippet}
+          onRevert={handleRevertChanges}
           onFormat={handleFormatSQL}
           onCopy={handleCopySnippet}
           onDelete={handleDeleteSnippet}
@@ -182,52 +183,33 @@ export default function SQLSnippetManager() {
           <textarea
             ref={editorRef}
             className="w-full h-full font-mono text-sm resize-none border-none outline-none p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-            defaultValue={currentSnippet?.sql || "-- Enter your SQL query here..."}
             style={{ fontFamily: 'JetBrains Mono, ui-monospace, SFMono-Regular, monospace' }}
           />
         </div>
         
         {/* Status Bar */}
         <div className="bg-slate-50 dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 px-4 py-2">
-          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-gray-400">
-            <div className="flex items-center gap-4">
-              <span>Lines: {stats.lines}</span>
-              <span>Characters: {stats.characters}</span>
-              <span>SQL</span>
-              
-              {/* Enhanced Autosave Status Indicator */}
-              <div className="flex items-center gap-1.5 ml-2">
-                {isUnsaved && !autoSaveStatus && (
-                  <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                    <Clock className="h-3 w-3" />
-                    <span className="font-medium">Unsaved changes</span>
-                  </div>
-                )}
-                {autoSaveStatus === "saving" && (
-                  <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span className="font-medium">Auto-saving...</span>
-                  </div>
-                )}
-                {autoSaveStatus === "saved" && (
-                  <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                    <Check className="h-3 w-3" />
-                    <span className="font-medium">Auto-saved</span>
-                  </div>
-                )}
-                {autoSaveStatus === "error" && (
-                  <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
-                    <AlertCircle className="h-3 w-3" />
-                    <span className="font-medium">Save failed</span>
-                  </div>
-                )}
+          <div className="flex items-center justify-between text-xs">
+            {/* Left: Essential Stats */}
+            <div className="flex items-center gap-4 text-slate-600 dark:text-gray-400">
+              <div className="flex items-center gap-3">
+                <div className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+                  SQL
+                </div>
+                <span>{stats.lines} lines</span>
               </div>
+              {currentSnippet && (
+                <div className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400">
+                  <Clock className="h-3 w-3" />
+                  <span>Last saved {formatDate(currentSnippet.lastModified)}</span>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-green-500" />
-              <span className="text-green-600 dark:text-green-400 font-medium">
-                All data stored locally in your browser. Nothing is uploaded or shared.
-              </span>
+
+            {/* Right: Storage Info */}
+            <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+              <Shield className="h-3.5 w-3.5" />
+              <span className="font-medium">Local storage</span>
             </div>
           </div>
         </div>

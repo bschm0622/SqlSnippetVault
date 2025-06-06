@@ -86,15 +86,24 @@ sql-snippet-manager/
 ├── client/                     # Frontend application
 │   ├── src/
 │   │   ├── components/         # Reusable UI components
-│   │   │   └── ui/            # Shadcn/ui components
+│   │   │   ├── ui/            # Shadcn/ui components
+│   │   │   ├── snippet-sidebar.tsx    # Left sidebar with snippet list and search
+│   │   │   ├── snippet-toolbar.tsx    # Top toolbar with name input and actions
+│   │   │   ├── keyboard-shortcuts-modal.tsx  # Help modal for shortcuts
+│   │   │   └── import-snippets-modal.tsx    # Import dialog
 │   │   ├── hooks/             # Custom React hooks
+│   │   │   ├── use-snippet-manager.ts   # Core snippet state management
+│   │   │   ├── use-keyboard-shortcuts.ts # Keyboard shortcut handling
+│   │   │   └── use-codemirror.ts        # CodeMirror setup
 │   │   ├── lib/               # Utility libraries
 │   │   │   ├── queryClient.ts # TanStack Query configuration
 │   │   │   ├── sql-formatter.ts # SQL formatting utilities
 │   │   │   ├── storage.ts     # LocalStorage management
 │   │   │   └── utils.ts       # General utilities
 │   │   ├── pages/             # Page components
-│   │   │   └── sql-snippet-manager.tsx # Main application page
+│   │   │   └── sql-snippet-manager.tsx # Main orchestration component
+│   │   ├── utils/             # Helper functions
+│   │   │   └── snippet-utils.ts  # Snippet-related utilities
 │   │   ├── types/             # TypeScript type definitions
 │   │   │   └── snippet.ts     # Snippet-related types
 │   │   ├── App.tsx           # Main app component with routing
@@ -114,6 +123,31 @@ sql-snippet-manager/
 ├── tsconfig.json         # TypeScript configuration
 └── vite.config.ts        # Vite configuration
 ```
+
+## 📐 Code Organization & Architecture
+
+The application follows a modular architecture with clear separation of concerns:
+
+### Core Components
+- **Snippet Manager**: Main orchestration component (152 lines) that coordinates the application's features
+- **Sidebar**: Self-contained component for snippet list and search functionality
+- **Toolbar**: Handles current snippet actions and name input
+- **Modal Components**: Separate components for keyboard shortcuts and import functionality
+
+### Custom Hooks
+- **use-snippet-manager**: Core state management and CRUD operations for snippets
+- **use-keyboard-shortcuts**: Centralized keyboard shortcut handling
+- **use-codemirror**: CodeMirror editor initialization and configuration
+
+### Utilities
+- **snippet-utils**: Helper functions for date formatting, import/export, and editor statistics
+- All utility functions are pure, making them easy to test and maintain
+
+This modular architecture provides several benefits:
+- 🎯 **Single Responsibility**: Each file has a focused purpose
+- 🔄 **Reusability**: Components and hooks can be reused across the application
+- 🧪 **Testability**: Business logic is isolated in custom hooks
+- 📦 **Maintainability**: Easy to locate and modify specific functionality
 
 ## 🎮 Usage
 

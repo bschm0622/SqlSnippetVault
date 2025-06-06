@@ -7,9 +7,8 @@ import {
   Copy, 
   Trash2, 
   Keyboard,
-  Check,
-  Loader2,
-  AlertCircle
+  RotateCcw,
+  Clock
 } from "lucide-react";
 
 interface SnippetToolbarProps {
@@ -17,8 +16,8 @@ interface SnippetToolbarProps {
   setSnippetName: (name: string) => void;
   onNameChange: () => void;
   isUnsaved: boolean;
-  autoSaveStatus?: "saved" | "saving" | "error" | null;
   onSave: () => void;
+  onRevert: () => void;
   onFormat: () => void;
   onCopy: () => void;
   onDelete: () => void;
@@ -32,8 +31,8 @@ export function SnippetToolbar({
   setSnippetName,
   onNameChange,
   isUnsaved,
-  autoSaveStatus,
   onSave,
+  onRevert,
   onFormat,
   onCopy,
   onDelete,
@@ -43,93 +42,92 @@ export function SnippetToolbar({
 }: SnippetToolbarProps) {
   return (
     <div className="bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-700 px-4 py-3">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-1">
-          <Input
-            type="text"
-            placeholder="Enter snippet name..."
-            value={snippetName}
-            onChange={(e) => {
-              setSnippetName(e.target.value);
-              onNameChange();
-            }}
-            className="max-w-xs text-sm font-medium border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+      <div className="flex items-center justify-between gap-6">
+        {/* Left Section: Primary Editing Controls */}
+        <div className="flex items-center gap-3 flex-1 max-w-xl">
+          <div className="flex-1 relative">
+            <Input
+              type="text"
+              placeholder="Enter snippet name..."
+              value={snippetName}
+              onChange={(e) => {
+                setSnippetName(e.target.value);
+                onNameChange();
+              }}
+              className="w-full text-sm font-medium border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* Backup status indicator */}
+            {isUnsaved && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-amber-500" />
+              </div>
+            )}
+          </div>
           <Button
             onClick={onSave}
             size="sm"
-            className={`px-4 py-2 transition-all duration-200 ${
-              autoSaveStatus === "saving" 
-                ? "bg-blue-500 hover:bg-blue-600" 
-                : autoSaveStatus === "saved"
-                ? "bg-green-600 hover:bg-green-700"
-                : autoSaveStatus === "error"
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-blue-600 hover:bg-blue-700"
-            } text-white`}
-            disabled={!snippetName.trim() || autoSaveStatus === "saving"}
+            className="min-w-[90px] bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={!snippetName.trim()}
           >
-            {autoSaveStatus === "saving" ? (
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-            ) : autoSaveStatus === "saved" ? (
-              <Check className="h-4 w-4 mr-1.5" />
-            ) : autoSaveStatus === "error" ? (
-              <AlertCircle className="h-4 w-4 mr-1.5" />
-            ) : (
-              <Save className="h-4 w-4 mr-1.5" />
-            )}
-            {autoSaveStatus === "saving" ? "Saving..." : 
-             autoSaveStatus === "saved" ? "Saved" :
-             autoSaveStatus === "error" ? "Failed" :
-             `Save${isUnsaved ? "*" : ""}`}
+            <Save className="h-4 w-4 mr-1.5" />
+            {isUnsaved ? "Save*" : "Save"}
           </Button>
+          {isUnsaved && (
+            <Button
+              onClick={onRevert}
+              size="sm"
+              variant="outline"
+              className="border-slate-300 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800 text-slate-700 dark:text-gray-300"
+            >
+              <RotateCcw className="h-4 w-4 mr-1.5" />
+              Revert
+            </Button>
+          )}
+        </div>
+
+        {/* Center Section: Common Actions */}
+        <div className="flex items-center gap-2 px-4 border-x border-slate-200 dark:border-gray-700">
           <Button
             variant="outline"
             size="sm"
             onClick={onFormat}
-            className="border-slate-300 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800 text-slate-700 dark:text-gray-300 px-3 py-2 transition-colors"
+            className="border-slate-300 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800 text-slate-700 dark:text-gray-300"
           >
             <Wand2 className="h-4 w-4 mr-1.5" />
             Format
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onCopy}
+            className="border-slate-300 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800 text-slate-700 dark:text-gray-300"
+          >
+            <Copy className="h-4 w-4 mr-1.5" />
+            Copy
+          </Button>
         </div>
-        
-        <div className="flex items-center gap-4">
-          {currentSnippet && (
-            <span className="text-xs text-slate-500 dark:text-gray-400 bg-slate-100 dark:bg-gray-800 px-2 py-1 rounded">
-              Last modified: {formatDate(currentSnippet.lastModified)}
-            </span>
-          )}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onShowHelp}
-              className="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-800"
-              title="Keyboard shortcuts (Ctrl+/)"
-            >
-              <Keyboard className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onCopy}
-              className="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-800"
-              title="Copy to clipboard (Ctrl+C)"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onDelete}
-              className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-              title="Delete snippet (Ctrl+D)"
-              disabled={!currentSnippet}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+
+        {/* Right Section: Secondary Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onShowHelp}
+            className="text-slate-600 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-800"
+            title="Keyboard shortcuts (Ctrl+/)"
+          >
+            <Keyboard className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onDelete}
+            className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+            title="Delete snippet (Ctrl+D)"
+            disabled={!currentSnippet}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
