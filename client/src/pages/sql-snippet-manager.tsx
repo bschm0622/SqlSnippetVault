@@ -51,12 +51,28 @@ export default function SQLSnippetManager() {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const codeMirrorRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const snippetNameRef = useRef<string>("");
+  const currentSnippetRef = useRef<SQLSnippet | null>(null);
   
   const { toast } = useToast();
 
+  // Update refs whenever values change
+  useEffect(() => {
+    snippetNameRef.current = snippetName;
+  }, [snippetName]);
+
+  useEffect(() => {
+    currentSnippetRef.current = currentSnippet;
+  }, [currentSnippet]);
+
   // Handlers wrapped with useCallback for stability and to prevent stale closures
   const handleSaveSnippet = useCallback(() => {
-    if (!snippetName.trim()) {
+    // Get the current values from refs
+    const currentName = snippetNameRef.current?.trim() || "";
+    const activeSnippet = currentSnippetRef.current;
+    
+    if (!currentName) {
+      console.log('Name validation failed:', { snippetName: snippetNameRef.current, currentName });
       toast({
         title: "Error",
         description: "Snippet name is required",
@@ -67,10 +83,10 @@ export default function SQLSnippetManager() {
 
     const sql = codeMirrorRef.current?.getValue() || "";
 
-    if (currentSnippet) {
+    if (activeSnippet) {
       // Update existing snippet
-      const updated = snippetStorage.updateSnippet(currentSnippet.id, {
-        name: snippetName,
+      const updated = snippetStorage.updateSnippet(activeSnippet.id, {
+        name: currentName,
         sql: sql,
       });
       
@@ -83,7 +99,7 @@ export default function SQLSnippetManager() {
     } else {
       // Create new snippet
       const newSnippet = snippetStorage.createSnippet({
-        name: snippetName,
+        name: currentName,
         sql: sql,
       });
       
@@ -92,7 +108,7 @@ export default function SQLSnippetManager() {
       setIsUnsaved(false);
       setAutoSaveStatus("saved");
     }
-  }, [currentSnippet, snippetName, toast]);
+  }, [toast]);
 
   const handleFormatSQL = useCallback(() => {
     if (!codeMirrorRef.current) return;
@@ -335,12 +351,7 @@ export default function SQLSnippetManager() {
   // Handle keyboard shortcuts globally
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Handle Ctrl+S (Save)
-      if (event.ctrlKey && event.key === 's') {
-        event.preventDefault();
-        handleSaveSnippet();
-        return;
-      }
+      // Remove Ctrl+S handler since it's now in CodeMirror config
 
       // Handle Ctrl+Shift+F (Format)
       if (event.ctrlKey && event.shiftKey && event.key === 'F') {
@@ -395,7 +406,7 @@ export default function SQLSnippetManager() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleSaveSnippet, handleFormatSQL, handleCopySnippet, handleCreateSnippet, currentSnippet, showKeyboardHelp, isImportModalOpen]); // Include dependencies so handlers have current state
+  }, [handleSaveSnippet, handleFormatSQL, handleCopySnippet, handleCreateSnippet, currentSnippet, showKeyboardHelp, isImportModalOpen, snippetName, toast]); // Added snippetName and toast to dependencies
 
   // Update filtered snippets when search query changes
   const filteredSnippets = React.useMemo(() => {
