@@ -5,6 +5,7 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
 ## ✨ Features
 
 - **Local Storage**: All data stays in your browser - completely private and offline-capable
+- **Auto-Save**: Changes are automatically saved after 1 second of inactivity
 - **Syntax Highlighting**: Full SQL syntax highlighting powered by CodeMirror
 - **SQL Formatting**: One-click BigQuery-style SQL formatting
 - **Search & Filter**: Quickly find snippets by name or content

@@ -212,8 +212,19 @@ export default function SQLSnippetManager() {
 
     const debouncedSave = debounce(() => {
       if (isUnsaved && snippetName.trim() && currentSnippet) {
-        setAutoSaveStatus("saving");
-        handleSaveSnippet();
+        try {
+          setAutoSaveStatus("saving");
+          handleSaveSnippet();
+        } catch (error) {
+          console.error('Auto-save failed:', error);
+          setAutoSaveStatus(null);
+          // Optionally show a toast notification here
+          toast({
+            title: "Auto-save failed",
+            description: "Your changes were not saved automatically. Please try saving manually.",
+            variant: "destructive",
+          });
+        }
       }
     }, AUTO_SAVE_DELAY);
 
@@ -231,7 +242,7 @@ export default function SQLSnippetManager() {
         codeMirrorRef.current.off("change", onChange);
       }
     };
-  }, [isUnsaved, snippetName, currentSnippet, handleSaveSnippet]);
+  }, [isUnsaved, snippetName, currentSnippet, handleSaveSnippet, toast]);
 
   // Initialize CodeMirror
   useEffect(() => {
@@ -621,11 +632,6 @@ export default function SQLSnippetManager() {
             </div>
             
             <div className="flex items-center gap-4">
-              {currentSnippet && (
-                <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
-                  Last modified: {formatDate(currentSnippet.lastModified)}
-                </span>
-              )}
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -694,12 +700,12 @@ export default function SQLSnippetManager() {
                 {autoSaveStatus === "saving" && (
                   <div className="flex items-center gap-1">
                     <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
-                    <span>Saving...</span>
+                    <span className="text-blue-500">Auto-saving...</span>
                   </div>
                 )}
                 {!isUnsaved && autoSaveStatus === "saved" && (
-                  <div className="flex items-center gap-1">
-                    <Check className="h-4 w-4 text-green-500" />
+                  <div className="flex items-center gap-1 text-green-500 transition-opacity duration-200">
+                    <Check className="h-4 w-4" />
                     <span>All changes saved</span>
                   </div>
                 )}
@@ -720,20 +726,101 @@ export default function SQLSnippetManager() {
 
       {/* Modals */}
       <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
-        <DialogContent>
-          {/* ... existing import modal content ... */}
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Snippets</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Choose a JSON file containing SQL snippets to import. This will add to your existing snippets.
+            </p>
+            <div className="flex items-center gap-2">
+              <Input
+                type="file"
+                ref={fileInputRef}
+                accept=".json"
+                onChange={handleFileSelect}
+                className="flex-1"
+              />
+            </div>
+            <p className="text-xs text-slate-400">
+              <AlertCircle className="inline-block h-3 w-3 mr-1" />
+              Make sure to backup your existing snippets before importing.
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showKeyboardHelp} onOpenChange={setShowKeyboardHelp}>
-        <DialogContent>
-          {/* ... existing keyboard shortcuts content ... */}
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Save snippet</span>
+                <kbd className="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-md dark:bg-slate-700 dark:text-slate-100">Ctrl + S</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Format SQL</span>
+                <kbd className="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-md dark:bg-slate-700 dark:text-slate-100">Ctrl + Shift + F</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Copy snippet</span>
+                <kbd className="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-md dark:bg-slate-700 dark:text-slate-100">Ctrl + C</kbd>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">New snippet</span>
+                <kbd className="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-md dark:bg-slate-700 dark:text-slate-100">Ctrl + N</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Delete snippet</span>
+                <kbd className="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-md dark:bg-slate-700 dark:text-slate-100">Ctrl + D</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Show shortcuts</span>
+                <kbd className="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-md dark:bg-slate-700 dark:text-slate-100">Ctrl + /</kbd>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+            Press <kbd className="px-1.5 py-0.5 text-xs font-semibold text-slate-800 bg-slate-100 rounded-md dark:bg-slate-700 dark:text-slate-100">Escape</kbd> to close any modal
+          </p>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
-          {/* ... existing delete confirmation content ... */}
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 dark:text-red-500">Delete Snippet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Are you sure you want to delete <span className="font-semibold">{currentSnippet?.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  handleDeleteSnippet();
+                  setShowDeleteConfirm(false);
+                }}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4 mr-1.5" />
+                Delete
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
