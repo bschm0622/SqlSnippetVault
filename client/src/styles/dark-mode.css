@@ -25,6 +25,66 @@
   color: #64748b !important;
 }
 
+/* SQL Syntax Highlighting in Dark Mode */
+.dark .CodeMirror.cm-s-default .cm-keyword,
+.dark .CodeMirror.cm-s-material-darker .cm-keyword {
+  color: #93c5fd !important; /* Bright blue for keywords */
+}
+
+.dark .CodeMirror.cm-s-default .cm-operator,
+.dark .CodeMirror.cm-s-material-darker .cm-operator {
+  color: #e2e8f0 !important; /* Light gray for operators */
+}
+
+.dark .CodeMirror.cm-s-default .cm-number,
+.dark .CodeMirror.cm-s-material-darker .cm-number {
+  color: #86efac !important; /* Light green for numbers */
+}
+
+.dark .CodeMirror.cm-s-default .cm-string,
+.dark .CodeMirror.cm-s-material-darker .cm-string {
+  color: #fca5a5 !important; /* Light red for strings */
+}
+
+.dark .CodeMirror.cm-s-default .cm-comment,
+.dark .CodeMirror.cm-s-material-darker .cm-comment {
+  color: #94a3b8 !important; /* Slate gray for comments */
+}
+
+.dark .CodeMirror.cm-s-default .cm-def,
+.dark .CodeMirror.cm-s-material-darker .cm-def {
+  color: #c4b5fd !important; /* Light purple for definitions */
+}
+
+.dark .CodeMirror.cm-s-default .cm-variable,
+.dark .CodeMirror.cm-s-material-darker .cm-variable {
+  color: #f1f5f9 !important; /* Very light gray for variables */
+}
+
+.dark .CodeMirror.cm-s-default .cm-variable-2,
+.dark .CodeMirror.cm-s-material-darker .cm-variable-2 {
+  color: #bae6fd !important; /* Light blue for special variables */
+}
+
+.dark .CodeMirror.cm-s-default .cm-builtin,
+.dark .CodeMirror.cm-s-material-darker .cm-builtin {
+  color: #fde047 !important; /* Light yellow for built-in functions */
+}
+
+.dark .CodeMirror.cm-s-default .cm-punctuation,
+.dark .CodeMirror.cm-s-material-darker .cm-punctuation {
+  color: #e2e8f0 !important; /* Light gray for punctuation */
+}
+
+/* Active Line Highlight */
+.dark .CodeMirror-activeline-background {
+  background: #1e293b !important;
+}
+
+.dark .CodeMirror-activeline-gutter {
+  background: #0f172a !important;
+}
+
 /* Dark mode styles for the UI */
 .dark .bg-white {
   background-color: #0f172a !important;

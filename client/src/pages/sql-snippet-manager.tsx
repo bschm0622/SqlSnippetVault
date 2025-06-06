@@ -83,7 +83,7 @@ export default function SQLSnippetManager() {
         
         codeMirrorRef.current = window.CodeMirror.fromTextArea(editorRef.current, {
           mode: "text/x-sql",
-          theme: "default",
+          theme: theme === 'dark' ? "material-darker" : "default",
           lineNumbers: true,
           indentUnit: 2,
           tabSize: 2,
