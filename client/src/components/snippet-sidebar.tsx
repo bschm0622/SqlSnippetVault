@@ -34,9 +34,9 @@ export function SnippetSidebar({
   formatDate,
 }: SnippetSidebarProps) {
   return (
-    <div className="w-80 bg-slate-800 text-white flex flex-col border-r border-slate-700">
+    <div className="w-80 bg-slate-800 dark:bg-gray-900 text-white flex flex-col border-r border-slate-700 dark:border-gray-700">
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-slate-700">
+      <div className="p-4 border-b border-slate-700 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg font-semibold text-white flex items-center gap-2">
             <Database className="h-5 w-5 text-blue-400" />

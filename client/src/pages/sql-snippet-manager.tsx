@@ -167,6 +167,7 @@ export default function SQLSnippetManager() {
           setSnippetName={setSnippetName}
           onNameChange={() => setIsUnsaved(true)}
           isUnsaved={isUnsaved}
+          autoSaveStatus={autoSaveStatus}
           onSave={handleSaveSnippet}
           onFormat={handleFormatSQL}
           onCopy={handleCopySnippet}
