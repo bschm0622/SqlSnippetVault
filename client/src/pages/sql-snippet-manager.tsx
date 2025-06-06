@@ -12,6 +12,7 @@ import { formatDate, exportSnippets, importSnippets, getEditorStats } from "@/ut
 import { Shield, Sun, Moon, Check, Loader2, AlertCircle, Clock, Database, Plus, Keyboard, BookOpen, ExternalLink } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import "../styles/codemirror.css";
 
 declare global {
   interface Window {
@@ -211,6 +212,8 @@ export default function SQLSnippetManager() {
             ref={editorRef}
             className="w-full h-full font-mono text-sm resize-none border-none outline-none px-6 py-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
             style={{ fontFamily: 'JetBrains Mono, ui-monospace, SFMono-Regular, monospace' }}
+            placeholder="Write your SQL query here... (Ctrl+Shift+F to format)"
+            defaultValue=""
           />
         </div>
         
