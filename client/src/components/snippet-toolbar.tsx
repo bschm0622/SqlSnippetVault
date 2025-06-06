@@ -41,10 +41,10 @@ export function SnippetToolbar({
   formatDate,
 }: SnippetToolbarProps) {
   return (
-    <div className="bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-700 px-4 py-3">
-      <div className="flex items-center justify-between gap-6">
+    <div className="bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-700 px-6 py-3">
+      <div className="flex items-center gap-6">
         {/* Left Section: Primary Editing Controls */}
-        <div className="flex items-center gap-3 flex-1 max-w-xl">
+        <div className="flex items-center gap-3 flex-1">
           <div className="flex-1 relative">
             <Input
               type="text"
@@ -54,7 +54,7 @@ export function SnippetToolbar({
                 setSnippetName(e.target.value);
                 onNameChange();
               }}
-              className="w-full text-sm font-medium border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full text-sm font-medium border-slate-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             {/* Backup status indicator */}
             {isUnsaved && (
@@ -85,8 +85,8 @@ export function SnippetToolbar({
           )}
         </div>
 
-        {/* Center Section: Common Actions */}
-        <div className="flex items-center gap-2 px-4 border-x border-slate-200 dark:border-gray-700">
+        {/* Right Section: Actions */}
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -105,22 +105,10 @@ export function SnippetToolbar({
             <Copy className="h-4 w-4 mr-1.5" />
             Copy
           </Button>
-        </div>
-
-        {/* Right Section: Secondary Actions */}
-        <div className="flex items-center gap-2">
+          <div className="w-px h-6 bg-slate-200 dark:bg-gray-700 mx-1" />
           <Button
             variant="ghost"
-            size="sm"
-            onClick={onShowHelp}
-            className="text-slate-600 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-800"
-            title="Keyboard shortcuts (Ctrl+/)"
-          >
-            <Keyboard className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onDelete}
             className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
             title="Delete snippet (Ctrl+D)"
