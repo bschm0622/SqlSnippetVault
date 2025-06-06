@@ -37,20 +37,14 @@ export function SnippetSidebar({
     <div className="w-80 bg-slate-800 dark:bg-gray-900 text-white flex flex-col border-r border-slate-700 dark:border-gray-700">
       {/* Sidebar Header */}
       <div className="px-5 py-4 border-b border-slate-700 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold text-white flex items-center gap-2.5">
-            <Database className="h-5 w-5 text-blue-400" />
-            SQL Snippets
-          </h1>
-          <Button
-            onClick={onCreateSnippet}
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-md transition-colors"
-          >
-            <Plus className="h-4 w-4 mr-1.5" />
-            New
-          </Button>
-        </div>
+        <Button
+          onClick={onCreateSnippet}
+          size="default"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white mb-4 py-2 transition-all duration-200 hover:shadow-md active:transform active:scale-[0.98]"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          New Snippet
+        </Button>
         
         {/* Search Input */}
         <div className="relative">

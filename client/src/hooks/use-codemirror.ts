@@ -14,62 +14,66 @@ export function useCodeMirror({
   onEditorChange,
 }: UseCodeMirrorProps) {
   useEffect(() => {
-    const initCodeMirror = () => {
+    const initCodeMirror = async () => {
       if (editorRef.current && window.CodeMirror && !codeMirrorRef.current) {
         codeMirrorRef.current = window.CodeMirror.fromTextArea(editorRef.current, {
           mode: "text/x-sql",
-          theme: "default",
+          theme: document.documentElement.classList.contains('dark') ? "material-darker" : "default",
           lineNumbers: true,
           indentUnit: 2,
           tabSize: 2,
           lineWrapping: true,
           autoCloseBrackets: true,
           matchBrackets: true,
-          placeholder: "-- Enter your SQL query here...",
+          placeholder: "Enter your SQL query here...",
+          viewportMargin: Infinity,
           extraKeys: {
-            "Ctrl-S": (cm: any) => {
-              // Prevent browser default save dialog
-              return false;
-            },
-            "Ctrl-Shift-F": (cm: any) => {
-              // Prevent browser default find dialog
-              return false;
-            },
+            "Ctrl-S": () => false,
+            "Ctrl-Shift-F": () => false,
           },
         });
 
-        // Set up change handler without triggering initial save
-        const onChange = (cm: any, change: any) => {
-          // Only trigger if it's a real user change
-          if (change.origin !== 'setValue') {
-            onEditorChange();
-          }
-        };
+        // Make CodeMirror fill its container
+        const wrapper = codeMirrorRef.current.getWrapperElement();
+        wrapper.style.height = '100%';
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '0';
+        wrapper.style.right = '0';
+        wrapper.style.top = '0';
+        wrapper.style.bottom = '0';
+        
+        // Refresh to ensure proper sizing
+        setTimeout(() => codeMirrorRef.current.refresh(), 0);
 
-        codeMirrorRef.current.on("change", onChange);
+        // Handle changes
+        codeMirrorRef.current.on("change", onEditorChange);
+
+        // Handle theme changes
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+              const isDark = document.documentElement.classList.contains('dark');
+              codeMirrorRef.current.setOption('theme', isDark ? 'material-darker' : 'default');
+            }
+          });
+        });
+
+        observer.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['class'],
+        });
+
         isEditorReady.current = true;
       }
     };
 
-    // Check if CodeMirror is already loaded
-    if (window.CodeMirror) {
-      initCodeMirror();
-    } else {
-      // Wait for CodeMirror to load
-      const checkCodeMirror = setInterval(() => {
-        if (window.CodeMirror) {
-          clearInterval(checkCodeMirror);
-          initCodeMirror();
-        }
-      }, 100);
+    initCodeMirror();
 
-      return () => clearInterval(checkCodeMirror);
-    }
-
-    // Cleanup
     return () => {
       if (codeMirrorRef.current) {
-        codeMirrorRef.current.off("change");
+        codeMirrorRef.current.toTextArea();
+        codeMirrorRef.current = null;
+        isEditorReady.current = false;
       }
     };
   }, [editorRef, codeMirrorRef, isEditorReady, onEditorChange]);
