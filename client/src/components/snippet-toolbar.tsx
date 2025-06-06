@@ -9,8 +9,12 @@ import {
   Keyboard,
   Check,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Sun,
+  Moon,
+  Plus
 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 interface SnippetToolbarProps {
   snippetName: string;
@@ -23,6 +27,7 @@ interface SnippetToolbarProps {
   onCopy: () => void;
   onDelete: () => void;
   onShowHelp: () => void;
+  onCreateSnippet: () => void;
   currentSnippet: SQLSnippet | null;
   formatDate: (date: Date) => string;
 }

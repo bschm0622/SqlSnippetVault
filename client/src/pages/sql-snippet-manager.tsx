@@ -148,20 +148,7 @@ export default function SQLSnippetManager() {
 
       {/* Main Editor */}
       <div className="flex-1 flex flex-col bg-white dark:bg-gray-900">
-        {/* Header with theme toggle */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">SQL Snippet Manager</h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
-        </div>
-
-        {/* Toolbar */}
+        {/* Toolbar with theme toggle integrated */}
         <SnippetToolbar
           snippetName={snippetName}
           setSnippetName={setSnippetName}
