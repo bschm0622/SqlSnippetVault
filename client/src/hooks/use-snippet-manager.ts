@@ -133,7 +133,7 @@ export function useSnippetManager() {
   const handleCreateSnippet = useCallback(() => {
     const newSnippetData: CreateSnippetData = {
       name: "New Snippet",
-      sql: "-- Enter your SQL query here...",
+      sql: "",  // Empty string instead of comment
     };
 
     const newSnippet = snippetStorage.createSnippet(newSnippetData);
@@ -146,7 +146,20 @@ export function useSnippetManager() {
     setSnippetName(newSnippet.name);
     
     if (codeMirrorRef.current && isEditorReady.current) {
-      codeMirrorRef.current.setValue(newSnippet.sql);
+      // Temporarily remove change handler to prevent auto-save
+      const prevHandler = codeMirrorRef.current._handlers?.change?.[0];
+      if (prevHandler) {
+        codeMirrorRef.current.off("change", prevHandler);
+      }
+      
+      // Clear the editor
+      codeMirrorRef.current.setValue("");
+      codeMirrorRef.current.clearHistory();
+      
+      // Restore change handler
+      if (prevHandler) {
+        codeMirrorRef.current.on("change", prevHandler);
+      }
     }
     
     // Focus on name input

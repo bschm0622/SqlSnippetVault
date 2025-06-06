@@ -16,6 +16,7 @@ export function useCodeMirror({
   useEffect(() => {
     const initCodeMirror = async () => {
       if (editorRef.current && window.CodeMirror && !codeMirrorRef.current) {
+        // Initialize CodeMirror from the textarea
         codeMirrorRef.current = window.CodeMirror.fromTextArea(editorRef.current, {
           mode: "text/x-sql",
           theme: document.documentElement.classList.contains('dark') ? "material-darker" : "default",
@@ -25,7 +26,6 @@ export function useCodeMirror({
           lineWrapping: true,
           autoCloseBrackets: true,
           matchBrackets: true,
-          placeholder: "Enter your SQL query here...",
           viewportMargin: Infinity,
           extraKeys: {
             "Ctrl-S": () => false,
@@ -41,7 +41,7 @@ export function useCodeMirror({
         wrapper.style.right = '0';
         wrapper.style.top = '0';
         wrapper.style.bottom = '0';
-        
+
         // Refresh to ensure proper sizing
         setTimeout(() => codeMirrorRef.current.refresh(), 0);
 
