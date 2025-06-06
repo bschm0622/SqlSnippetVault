@@ -1,28 +1,14 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
+import SQLSnippetManager from "./pages/sql-snippet-manager";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import SQLSnippetManager from "@/pages/sql-snippet-manager";
 
-function Router() {
+export default function App() {
   return (
-    <Switch>
-      <Route path="/" component={SQLSnippetManager} />
-      <Route path="*" component={SQLSnippetManager} />
-    </Switch>
-  );
-}
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <div className="min-h-screen bg-background text-foreground">
+        <SQLSnippetManager />
         <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+      </div>
+    </ThemeProvider>
   );
 }
-
-export default App;

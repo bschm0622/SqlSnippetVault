@@ -1,3 +1,5 @@
+import { format } from "sql-formatter";
+
 declare global {
   interface Window {
     sqlFormatter: {
@@ -8,17 +10,14 @@ declare global {
 
 export function formatSQL(sql: string): string {
   try {
-    if (typeof window !== "undefined" && window.sqlFormatter) {
-      return window.sqlFormatter.format(sql, {
-        language: "bigquery",
-        indent: "  ",
-        uppercase: true,
-        linesBetweenQueries: 2,
-      });
-    }
-    return sql;
+    return format(sql, {
+      language: "postgresql", // More compatible with complex queries
+      keywordCase: "upper",
+      indentStyle: "standard",
+      linesBetweenQueries: 2,
+    });
   } catch (error) {
     console.error("Error formatting SQL:", error);
-    throw new Error("Failed to format SQL. Please check your syntax.");
+    throw error; // Throw the original error for better debugging
   }
 }
