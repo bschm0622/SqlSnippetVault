@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { snippetStorage } from "@/lib/storage";
 import { formatSQL } from "@/lib/sql-formatter";
 import { SQLSnippet, CreateSnippetData } from "@/types/snippet";
+import { debounce, AUTO_SAVE_DELAY } from "@/lib/utils";
 
 export function useSnippetManager() {
   const { toast } = useToast();
@@ -11,10 +12,22 @@ export function useSnippetManager() {
   const [searchQuery, setSearchQuery] = useState("");
   const [snippetName, setSnippetName] = useState("");
   const [isUnsaved, setIsUnsaved] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"saved" | "saving" | "error" | null>(null);
   
   const codeMirrorRef = useRef<any>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const isEditorReady = useRef(false);
+  const snippetNameRef = useRef<string>("");
+  const currentSnippetRef = useRef<SQLSnippet | null>(null);
+
+  // Update refs whenever values change
+  useEffect(() => {
+    snippetNameRef.current = snippetName;
+  }, [snippetName]);
+
+  useEffect(() => {
+    currentSnippetRef.current = currentSnippet;
+  }, [currentSnippet]);
 
   // Load snippets on mount
   useEffect(() => {
@@ -44,7 +57,11 @@ export function useSnippetManager() {
   }, []);
 
   const handleSaveSnippet = useCallback(() => {
-    if (!snippetName.trim()) {
+    // Get the current values from refs for stability
+    const currentName = snippetNameRef.current?.trim() || "";
+    const activeSnippet = currentSnippetRef.current;
+    
+    if (!currentName) {
       toast({
         title: "Error",
         description: "Snippet name is required",
@@ -55,10 +72,10 @@ export function useSnippetManager() {
 
     const sql = codeMirrorRef.current?.getValue() || "";
 
-    if (currentSnippet) {
+    if (activeSnippet) {
       // Update existing snippet
-      const updated = snippetStorage.updateSnippet(currentSnippet.id, {
-        name: snippetName,
+      const updated = snippetStorage.updateSnippet(activeSnippet.id, {
+        name: currentName,
         sql: sql,
       });
       
@@ -66,6 +83,7 @@ export function useSnippetManager() {
         setCurrentSnippet(updated);
         setSnippets(snippetStorage.getAllSnippets());
         setIsUnsaved(false);
+        setAutoSaveStatus("saved");
         
         toast({
           title: "Success",
@@ -75,20 +93,21 @@ export function useSnippetManager() {
     } else {
       // Create new snippet
       const newSnippet = snippetStorage.createSnippet({
-        name: snippetName,
+        name: currentName,
         sql: sql,
       });
       
       setCurrentSnippet(newSnippet);
       setSnippets(snippetStorage.getAllSnippets());
       setIsUnsaved(false);
+      setAutoSaveStatus("saved");
       
       toast({
         title: "Success",
         description: "Snippet created successfully",
       });
     }
-  }, [snippetName, currentSnippet, toast]);
+  }, [toast]);
 
   const handleCreateSnippet = useCallback(() => {
     const newSnippetData: CreateSnippetData = {
@@ -177,6 +196,43 @@ export function useSnippetManager() {
     }
   }, [toast]);
 
+  // Auto-save functionality
+  useEffect(() => {
+    if (!codeMirrorRef.current) return;
+
+    const debouncedSave = debounce(() => {
+      if (isUnsaved && snippetNameRef.current?.trim() && currentSnippetRef.current) {
+        try {
+          setAutoSaveStatus("saving");
+          handleSaveSnippet();
+        } catch (error) {
+          console.error('Auto-save failed:', error);
+          setAutoSaveStatus("error");
+          toast({
+            title: "Auto-save failed",
+            description: "Your changes were not saved automatically. Please try saving manually.",
+            variant: "destructive",
+          });
+        }
+      }
+    }, AUTO_SAVE_DELAY);
+
+    const onChange = () => {
+      setIsUnsaved(true);
+      setAutoSaveStatus(null); // Reset status when changes are made
+      debouncedSave();
+    };
+
+    codeMirrorRef.current.on("change", onChange);
+
+    return () => {
+      debouncedSave.cancel();
+      if (codeMirrorRef.current) {
+        codeMirrorRef.current.off("change", onChange);
+      }
+    };
+  }, [isUnsaved, handleSaveSnippet, toast]);
+
   return {
     // State
     snippets,
@@ -187,6 +243,7 @@ export function useSnippetManager() {
     setSnippetName,
     isUnsaved,
     setIsUnsaved,
+    autoSaveStatus,
     filteredSnippets,
     
     // Refs
