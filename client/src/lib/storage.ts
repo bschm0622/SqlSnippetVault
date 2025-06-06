@@ -1,6 +1,14 @@
 import { SQLSnippet, CreateSnippetData, UpdateSnippetData } from "@/types/snippet";
 
 const STORAGE_KEY = "sql-snippets";
+const BACKUP_KEY = "sql-snippets-backup";
+
+interface BackupData {
+  snippetId: string;
+  name: string;
+  sql: string;
+  timestamp: number;
+}
 
 export class SnippetStorage {
   private getSnippets(): SQLSnippet[] {
@@ -29,6 +37,57 @@ export class SnippetStorage {
     }
   }
 
+  private getBackupData(): Record<string, BackupData> {
+    try {
+      const data = localStorage.getItem(BACKUP_KEY);
+      if (!data) return {};
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Failed to load backups:', error);
+      return {};
+    }
+  }
+
+  private saveBackupData(backups: Record<string, BackupData>): void {
+    try {
+      localStorage.setItem(BACKUP_KEY, JSON.stringify(backups));
+    } catch (error) {
+      console.error('Failed to save backups:', error);
+    }
+  }
+
+  createBackup(snippetId: string, name: string, sql: string): void {
+    const backups = this.getBackupData();
+    backups[snippetId] = {
+      snippetId,
+      name,
+      sql,
+      timestamp: Date.now(),
+    };
+    this.saveBackupData(backups);
+  }
+
+  getBackup(snippetId: string): BackupData | null {
+    const backups = this.getBackupData();
+    return backups[snippetId] || null;
+  }
+
+  clearBackup(snippetId: string): void {
+    const backups = this.getBackupData();
+    delete backups[snippetId];
+    this.saveBackupData(backups);
+  }
+
+  hasUnsavedChanges(snippetId: string): boolean {
+    const backup = this.getBackup(snippetId);
+    if (!backup) return false;
+
+    const snippet = this.getSnippets().find(s => s.id === snippetId);
+    if (!snippet) return false;
+
+    return backup.sql !== snippet.sql || backup.name !== snippet.name;
+  }
+
   getAllSnippets(): SQLSnippet[] {
     return this.getSnippets().sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
   }
@@ -51,6 +110,7 @@ export class SnippetStorage {
 
     snippets.push(newSnippet);
     this.saveSnippets(snippets);
+    this.clearBackup(newSnippet.id);
     return newSnippet;
   }
 
@@ -68,6 +128,7 @@ export class SnippetStorage {
 
     snippets[index] = updatedSnippet;
     this.saveSnippets(snippets);
+    this.clearBackup(id);
     return updatedSnippet;
   }
 
@@ -78,6 +139,7 @@ export class SnippetStorage {
     if (filteredSnippets.length === snippets.length) return false;
     
     this.saveSnippets(filteredSnippets);
+    this.clearBackup(id);
     return true;
   }
 

@@ -1,0 +1,12 @@
+/* CodeMirror Placeholder Styles */
+.CodeMirror-empty {
+  position: relative;
+}
+
+.CodeMirror-placeholder {
+  color: #6B7280;
+  font-style: italic;
+  position: absolute;
+  opacity: 0.6;
+  white-space: pre-wrap;
+} 
