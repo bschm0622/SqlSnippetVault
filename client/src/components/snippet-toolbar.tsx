@@ -43,11 +43,38 @@ export function SnippetToolbar({
   onCopy,
   onDelete,
   onShowHelp,
+  onCreateSnippet,
   currentSnippet,
   formatDate,
 }: SnippetToolbarProps) {
+  const { theme, setTheme } = useTheme();
+
   return (
     <div className="bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-700 px-4 py-3">
+      {/* Top row with title and theme toggle */}
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">SQL Snippet Manager</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={onCreateSnippet}
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5"
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            New Snippet
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main toolbar */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
           <Input
@@ -58,7 +85,7 @@ export function SnippetToolbar({
               setSnippetName(e.target.value);
               onNameChange();
             }}
-            className="max-w-xs text-sm font-medium border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="max-w-xs text-sm font-medium border-slate-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
           />
           <Button
             onClick={onSave}
