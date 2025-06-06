@@ -56,6 +56,9 @@ export default function SQLSnippetManager() {
   
   const { toast } = useToast();
 
+  // Track if CodeMirror is ready
+  const isEditorReady = useRef(false);
+
   // Update refs whenever values change
   useEffect(() => {
     snippetNameRef.current = snippetName;
@@ -157,7 +160,7 @@ export default function SQLSnippetManager() {
     setSnippetName(snippet.name);
     setIsUnsaved(false);
     
-    if (codeMirrorRef.current) {
+    if (codeMirrorRef.current && isEditorReady.current) {
       codeMirrorRef.current.setValue(snippet.sql);
       setAutoSaveStatus("saved"); // Set to saved when a new snippet is selected
     }
@@ -208,19 +211,20 @@ export default function SQLSnippetManager() {
     }
   }, [currentSnippet, selectSnippet, toast]);
 
-  // Load snippets on mount
-  useEffect(() => {
-    loadSnippets();
-  }, []);
-
   const loadSnippets = useCallback(() => {
     const allSnippets = snippetStorage.getAllSnippets();
     setSnippets(allSnippets);
     
-    if (allSnippets.length > 0 && !currentSnippet) {
+    // Only select first snippet if we have snippets and editor is ready
+    if (allSnippets.length > 0 && !currentSnippet && isEditorReady.current) {
       selectSnippet(allSnippets[0]);
     }
   }, [currentSnippet, selectSnippet]);
+
+  // Load snippets on mount
+  useEffect(() => {
+    loadSnippets();
+  }, [loadSnippets]);
 
   // Auto-save logic inspired by useAutoSave.ts
   useEffect(() => {
@@ -262,7 +266,6 @@ export default function SQLSnippetManager() {
 
   // Initialize CodeMirror
   useEffect(() => {
-    // Load the placeholder addon
     const loadPlaceholderAddon = async () => {
       // Load the JavaScript
       const script = document.createElement('script');
@@ -318,6 +321,13 @@ export default function SQLSnippetManager() {
         const wrapper = codeMirrorRef.current.getWrapperElement();
         wrapper.style.height = '100%';
         codeMirrorRef.current.refresh();
+
+        // Mark editor as ready and load initial snippet if we have one
+        isEditorReady.current = true;
+        const allSnippets = snippetStorage.getAllSnippets();
+        if (allSnippets.length > 0 && !currentSnippet) {
+          selectSnippet(allSnippets[0]);
+        }
       }
     };
 
@@ -335,7 +345,7 @@ export default function SQLSnippetManager() {
 
       return () => clearInterval(checkCodeMirror);
     }
-  }, [theme, handleSaveSnippet, handleFormatSQL]);
+  }, [theme, handleSaveSnippet, handleFormatSQL, currentSnippet, selectSnippet]);
 
   // Update CodeMirror theme when dark mode changes
   useEffect(() => {
