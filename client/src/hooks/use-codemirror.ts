@@ -25,6 +25,7 @@ export function useCodeMirror({
           lineWrapping: true,
           autoCloseBrackets: true,
           matchBrackets: true,
+          placeholder: "-- Enter your SQL query here...",
           extraKeys: {
             "Ctrl-S": (cm: any) => {
               // Prevent browser default save dialog
@@ -37,7 +38,15 @@ export function useCodeMirror({
           },
         });
 
-        codeMirrorRef.current.on("change", onEditorChange);
+        // Set up change handler without triggering initial save
+        const onChange = (cm: any, change: any) => {
+          // Only trigger if it's a real user change
+          if (change.origin !== 'setValue') {
+            onEditorChange();
+          }
+        };
+
+        codeMirrorRef.current.on("change", onChange);
         isEditorReady.current = true;
       }
     };
@@ -56,5 +65,12 @@ export function useCodeMirror({
 
       return () => clearInterval(checkCodeMirror);
     }
+
+    // Cleanup
+    return () => {
+      if (codeMirrorRef.current) {
+        codeMirrorRef.current.off("change");
+      }
+    };
   }, [editorRef, codeMirrorRef, isEditorReady, onEditorChange]);
 }
