@@ -8,7 +8,9 @@ import { SnippetToolbar } from "@/components/snippet-toolbar";
 import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
 import { ImportSnippetsModal } from "@/components/import-snippets-modal";
 import { formatDate, exportSnippets, importSnippets, getEditorStats } from "@/utils/snippet-utils";
-import { Shield } from "lucide-react";
+import { Shield, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
 
 declare global {
   interface Window {
