@@ -150,8 +150,8 @@ export default function SQLSnippetManager() {
       {/* Main Editor */}
       <div className="flex-1 flex flex-col bg-white dark:bg-gray-900">
         {/* Header with theme toggle */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">SQL Snippet Manager</h1>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h1 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">SQL Snippet Manager</h1>
           <Button
             variant="ghost"
             size="sm"
@@ -182,32 +182,32 @@ export default function SQLSnippetManager() {
         <div className="flex-1 relative">
           <textarea
             ref={editorRef}
-            className="w-full h-full font-mono text-sm resize-none border-none outline-none p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+            className="w-full h-full font-mono text-sm resize-none border-none outline-none px-6 py-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
             style={{ fontFamily: 'JetBrains Mono, ui-monospace, SFMono-Regular, monospace' }}
           />
         </div>
         
         {/* Status Bar */}
-        <div className="bg-slate-50 dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 px-4 py-2">
+        <div className="bg-slate-50 dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 px-6 py-2.5">
           <div className="flex items-center justify-between text-xs">
             {/* Left: Essential Stats */}
-            <div className="flex items-center gap-4 text-slate-600 dark:text-gray-400">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center gap-6 text-slate-600 dark:text-gray-400">
+              <div className="flex items-center gap-4">
                 <div className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
                   SQL
                 </div>
                 <span>{stats.lines} lines</span>
               </div>
               {currentSnippet && (
-                <div className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400">
-                  <Clock className="h-3 w-3" />
+                <div className="flex items-center gap-2 text-slate-500 dark:text-gray-400">
+                  <Clock className="h-3.5 w-3.5" />
                   <span>Last saved {formatDate(currentSnippet.lastModified)}</span>
                 </div>
               )}
             </div>
 
             {/* Right: Storage Info */}
-            <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <Shield className="h-3.5 w-3.5" />
               <span className="font-medium">Local storage</span>
             </div>
