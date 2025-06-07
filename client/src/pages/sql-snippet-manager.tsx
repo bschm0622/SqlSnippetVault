@@ -3,13 +3,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useSnippetManager } from "@/hooks/use-snippet-manager";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useCodeMirror } from "@/hooks/use-codemirror";
+import { useAuth } from "@/contexts/AuthContext";
 import { SnippetSidebar } from "@/components/snippet-sidebar";
 import { SnippetToolbar } from "@/components/snippet-toolbar";
 import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
 import { ImportSnippetsModal } from "@/components/import-snippets-modal";
 import { HelpGuideModal } from "@/components/help-guide-modal";
+import { GitHubLoginButton } from "@/components/auth/GitHubLoginButton";
 import { formatDate, exportSnippets, importSnippets, getEditorStats } from "@/utils/snippet-utils";
-import { Shield, Sun, Moon, Check, Loader2, AlertCircle, Clock, Database, Plus, Keyboard, BookOpen, ExternalLink } from "lucide-react";
+import { Shield, Sun, Moon, Check, Loader2, AlertCircle, Clock, Database, Plus, Keyboard, BookOpen, ExternalLink, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import "../styles/codemirror.css";
@@ -21,6 +23,7 @@ declare global {
 }
 
 export default function SQLSnippetManager() {
+  const { user, loading, signOut } = useAuth();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -59,6 +62,48 @@ export default function SQLSnippetManager() {
     isEditorReady,
     onEditorChange: () => setIsUnsaved(true),
   });
+
+  // Handle modal state
+  const handleCloseModals = () => {
+    if (showKeyboardHelp) {
+      setShowKeyboardHelp(false);
+    } else if (isImportModalOpen) {
+      setIsImportModalOpen(false);
+    } else if (showHelpGuide) {
+      setShowHelpGuide(false);
+    }
+  };
+
+  // Setup keyboard shortcuts
+  useKeyboardShortcuts({
+    onSave: handleSaveSnippet,
+    onFormat: handleFormatSQL,
+    onCopy: handleCopySnippet,
+    onNew: handleCreateSnippet,
+    onDelete: handleDeleteSnippet,
+    onShowHelp: () => setShowKeyboardHelp(true),
+    onCloseModals: handleCloseModals,
+    codeMirrorRef,
+    currentSnippet,
+    showKeyboardHelp,
+    isImportModalOpen,
+  });
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+      });
+    }
+  };
 
   // Handle import/export
   const handleExportSnippets = () => {
@@ -109,34 +154,39 @@ export default function SQLSnippetManager() {
     }
   };
 
-  // Handle modal state
-  const handleCloseModals = () => {
-    if (showKeyboardHelp) {
-      setShowKeyboardHelp(false);
-    } else if (isImportModalOpen) {
-      setIsImportModalOpen(false);
-    } else if (showHelpGuide) {
-      setShowHelpGuide(false);
-    }
-  };
-
-  // Setup keyboard shortcuts
-  useKeyboardShortcuts({
-    onSave: handleSaveSnippet,
-    onFormat: handleFormatSQL,
-    onCopy: handleCopySnippet,
-    onNew: handleCreateSnippet,
-    onDelete: handleDeleteSnippet,
-    onShowHelp: () => setShowKeyboardHelp(true),
-    onCloseModals: handleCloseModals,
-    codeMirrorRef,
-    currentSnippet,
-    showKeyboardHelp,
-    isImportModalOpen,
-  });
-
   const stats = getEditorStats(codeMirrorRef);
 
+  // If auth is loading, show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <h2 className="text-lg font-semibold mb-2">Loading...</h2>
+          <p className="text-sm text-muted-foreground">Please wait while we set up your session.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is not authenticated, show login screen
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-full max-w-sm space-y-6 p-6">
+          <div className="text-center space-y-2">
+            <Database className="h-12 w-12 mx-auto text-primary" />
+            <h1 className="text-2xl font-bold">SQL Snippet Manager</h1>
+            <p className="text-sm text-muted-foreground">
+              Sign in with GitHub to start managing your SQL snippets
+            </p>
+          </div>
+          <GitHubLoginButton />
+        </div>
+      </div>
+    );
+  }
+
+  // Main app render
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
@@ -161,6 +211,10 @@ export default function SQLSnippetManager() {
             <h1 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">SQL Snippet Manager</h1>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center mr-4 gap-2 text-sm text-muted-foreground">
+              <Shield className="h-4 w-4" />
+              {user?.email || user?.user_metadata?.preferred_username || 'User'}
+            </div>
             <Button
               variant="ghost"
               size="icon"
@@ -186,6 +240,15 @@ export default function SQLSnippetManager() {
               className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSignOut}
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>

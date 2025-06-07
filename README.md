@@ -4,6 +4,7 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
 
 ## ✨ Features
 
+- **GitHub Authentication**: Secure login with GitHub OAuth via Supabase
 - **Local Storage**: All data stays in your browser - completely private and offline-capable
 - **Auto-Save**: Changes are automatically saved after 1 second of inactivity
 - **Syntax Highlighting**: Full SQL syntax highlighting powered by CodeMirror
@@ -21,6 +22,10 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
 - **Vite** for build tooling and development server
 - **Wouter** for client-side routing
 
+### Authentication & Backend
+- **Supabase** for authentication and session management
+- **GitHub OAuth** for secure user authentication
+
 ### UI Components & Styling
 - **Tailwind CSS** for styling
 - **Shadcn/ui** component library (built on Radix UI primitives)
@@ -34,6 +39,7 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
 ### State Management & Forms
 - **TanStack Query (React Query)** for data management
 - **React Hook Form** with Zod validation for forms
+- **React Context** for auth state management
 - **React localStorage** for data persistence
 
 ### Development Tools
@@ -47,6 +53,7 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
 
 - **Node.js** (version 18 or higher)
 - **npm** or **yarn** package manager
+- **Supabase Account** for authentication (free tier works fine)
 
 ### Installation
 
@@ -61,12 +68,29 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
    npm install
    ```
 
-3. **Start the development server**
+3. **Set up environment variables**
+   ```bash
+   # Create a .env file in the client directory
+   cd client
+   cp .env.example .env
+
+   # Add your Supabase credentials
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Configure Supabase**
+   - Create a new project in Supabase
+   - Enable GitHub OAuth in Authentication > Providers
+   - Add your GitHub OAuth credentials
+   - Update the callback URL in your GitHub OAuth app settings
+
+5. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+6. **Open your browser**
    Navigate to `http://localhost:5000` (or the port shown in your terminal)
 
 ### Production Build
