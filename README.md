@@ -329,6 +329,37 @@ If you encounter any issues or have questions:
 2. Create a new issue with detailed reproduction steps
 3. Include browser version and any console errors
 
+## 🔒 Environment Variables & Security
+
+### Local Development
+1. Copy the example environment file:
+   ```bash
+   cp client/.env.example client/.env
+   ```
+2. Update `client/.env` with your credentials
+3. Never commit `.env` files to version control
+4. If you accidentally commit sensitive data:
+   - Revoke and rotate the exposed credentials immediately
+   - Remove sensitive data from git history
+   - Contact your security team
+
+### Production Deployment
+- Use your hosting platform's environment variables feature
+- Never store sensitive values in code or version control
+- Rotate credentials periodically
+- Use separate credentials for development and production
+
+### Required Environment Variables
+```
+# Supabase Configuration
+VITE_SUPABASE_URL=           # Your Supabase project URL
+VITE_SUPABASE_ANON_KEY=      # Your Supabase anonymous key
+
+# Stripe Configuration
+VITE_STRIPE_PUBLISHABLE_KEY= # Your Stripe publishable key
+VITE_STRIPE_PRICE_ID=        # Your Stripe price ID
+```
+
 ---
 
 **Built with ❤️ for developers who love clean, efficient SQL workflows.**
