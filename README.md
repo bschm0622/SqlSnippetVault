@@ -14,6 +14,24 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
 - **Import/Export**: Backup and restore snippets via JSON files
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **No Backend Required**: Pure frontend application with local persistence
+- **Premium Features**: Access advanced features with a one-time payment
+- **Secure Payments**: Integrated with Stripe for secure payment processing
+
+## 💎 Premium Features
+
+Unlock advanced capabilities with a one-time payment:
+
+- **Cloud Sync**: Automatically sync your snippets across devices
+- **Unlimited Snippets**: No limit on the number of stored snippets
+- **Advanced Search**: Full-text search with filtering and tagging
+- **Team Sharing**: Share snippets with team members (coming soon)
+- **Priority Support**: Get priority assistance for any issues
+
+### Payment Integration
+- Secure payment processing through Stripe
+- One-time payment model (no subscriptions)
+- Instant access to premium features after payment
+- Automatic account status updates via webhooks
 
 ## 🔧 Tech Stack
 
@@ -25,6 +43,8 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
 ### Authentication & Backend
 - **Supabase** for authentication and session management
 - **GitHub OAuth** for secure user authentication
+- **Stripe** for payment processing
+- **Edge Functions** for webhook handling
 
 ### UI Components & Styling
 - **Tailwind CSS** for styling
@@ -74,9 +94,15 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
    cd client
    cp .env.example .env
 
-   # Add your Supabase credentials
+   # Add your Supabase and Stripe credentials
    VITE_SUPABASE_URL=your_supabase_project_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+   VITE_STRIPE_PRICE_ID=your_stripe_price_id
+
+   # Supabase Edge Function environment variables
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
    ```
 
 4. **Configure Supabase**
@@ -84,6 +110,8 @@ A lightweight, browser-based SQL snippet manager with local storage, syntax high
    - Enable GitHub OAuth in Authentication > Providers
    - Add your GitHub OAuth credentials
    - Update the callback URL in your GitHub OAuth app settings
+   - Deploy Edge Functions for Stripe integration
+   - Set up Stripe webhook endpoint in your Stripe dashboard
 
 5. **Start the development server**
    ```bash

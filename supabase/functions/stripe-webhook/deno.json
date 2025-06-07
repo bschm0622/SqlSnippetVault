@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "types": ["https://deno.land/x/stripe_types/mod.d.ts"]
+  }
+} 

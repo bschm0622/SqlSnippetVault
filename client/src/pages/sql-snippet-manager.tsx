@@ -15,6 +15,7 @@ import { Shield, Sun, Moon, Check, Loader2, AlertCircle, Clock, Database, Plus, 
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import "../styles/codemirror.css";
+import { ProUpgrade } from "@/components/upgrade/ProUpgrade";
 
 declare global {
   interface Window {
@@ -214,6 +215,9 @@ export default function SQLSnippetManager() {
             <div className="flex items-center mr-4 gap-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4" />
               {user?.email || user?.user_metadata?.preferred_username || 'User'}
+            </div>
+            <div className="mr-2">
+              <ProUpgrade />
             </div>
             <Button
               variant="ghost"
